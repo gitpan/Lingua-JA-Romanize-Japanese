@@ -1,0 +1,10 @@
+Makefile.PL
+lib/Lingua/JA/Romanize/DictJA.pm
+lib/Lingua/JA/Romanize/Japanese.pm
+lib/Lingua/JA/Romanize/Kana.pm
+skk/SKK-JISYO.S
+README
+MANIFEST
+META.yml
+t/kana.t
+t/japanese.t
