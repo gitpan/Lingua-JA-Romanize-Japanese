@@ -1,0 +1,8 @@
+# Lingua::JA::Romanize::* modules Changes
+
+2006/04/04 (0.12)
+	- Lingua::JA::Romanize::Juman module added
+	- Lingua::JA::Romanize::MeCab module added
+
+2006/03/26 (0.11)
+	- first release

@@ -1,10 +1,18 @@
 # ----------------------------------------------------------------
     use strict;
     use Test::More tests => 14;
-    BEGIN { use_ok('Lingua::JA::Romanize::Japanese'); };
 # ----------------------------------------------------------------
-{
-    my $roman = Lingua::JA::Romanize::Japanese->new();
+SKIP: {
+    local $@;
+    eval { require MeCab; };
+    skip( "MeCab.pm is not available.", 14 ) if $@;
+    use_ok('Lingua::JA::Romanize::MeCab');
+    my $roman = Lingua::JA::Romanize::MeCab->new();
+    &test_ja( $roman );
+}
+# ----------------------------------------------------------------
+sub test_ja {
+    my $roman = shift;
     ok( ref $roman, "new" );
 
     ok( (! defined $roman->char("a")), "char: ascii" );

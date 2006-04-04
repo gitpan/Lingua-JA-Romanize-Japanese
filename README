@@ -19,22 +19,27 @@ SYNOPSIS
         }
 
 DESCRIPTION
-    Japanese is written with a mix of Kanji and Kana characters.
+    Japanese language is written with a mix of Kanji and Kana characters.
+    Most of Kanji characters used in Japan were imported from China. Two
+    types of Kana characters, called Katakana and Hiragana, were created in
+    Japan. Kana characters are general terms for the syllabic Japanese
+    scripts.
 
-        $conv = Lingua::JA::Romanize::Japanese->new();
-
+METHODS
+  $conv = Lingua::JA::Romanize::Japanese->new();
     This constructer methods returns a new object with its dictionary
     cached.
 
-        $roman = $conv->char( $kanji );
-
+  $roman = $conv->char( $kanji );
     This method returns romanized letters of a Japanese character. It
     returns undef when $Kana is not a valid Japanese character. The
     argument's encoding must be UTF-8. Both of Kanji and Kana characters are
     allowed.
 
-        @array = $conv->string( $string );
+  $roman = $conv->chars( $string );
+    This method returns romanized letters of Japanese characters.
 
+  @array = $conv->string( $string );
     This method returns a array of referenced arrays which are pairs of
     Japanese chacater(s) and its romanized letters.
 
@@ -52,16 +57,16 @@ MODULE DEPENDENCIES
     DB_File module is required.
 
 SEE ALSO
-    Lingua::ZH::Romanize::Kana
+    Lingua::JA::Romanize::Kana Lingua::JA::Romanize::Juman
+    Lingua::JA::Romanize::MeCab Lingua::ZH::Romanize::Pinyin
+    Lingua::KO::Romanize::Hangul
 
-    http://www.kawa.net/works/ajax/romanize/japanese-e.html
+    http://www.kawa.net/works/perl/romanize/romanize-e.html
 
     http://openlab.jp/skk/
 
 AUTHOR
-    Yusuke Kawasaki <u-suke [at] kawa.net>
-
-    http://www.kawa.net/
+    Yusuke Kawasaki http://www.kawa.net/
 
 COPYRIGHT
     Copyright (c) 2006 Yusuke Kawasaki. All rights reserved.

@@ -24,20 +24,26 @@ Lingua::JA::Romanize::Kana - Romanization of Japanese Hiragana/Katakana
 
 Hiragana and Katakana are general terms for the syllabic Japanese scripts.
 
-    $conv = Lingua::JA::Romanize::Kana->new();
+=head1 METHODS
+
+=head2 $conv = Lingua::JA::Romanize::Kana->new();
 
 This constructer methods returns a new object with its dictionary cached.
 
-    $roman = $conv->char( $Kana );
+=head2 $roman = $conv->char( $Kana );
 
 This method returns romanized letters of a Kana character.
 It returns undef when $Kana is not a valid Kana character.
 The argument's encoding must be UTF-8.
 Both of Hiragana or Katakana characters are allowed.
 But Kanji character is not supported by this module.
-See L<Lingua::ZH::Romanize::Japanese>.
+See L<Lingua::JA::Romanize::Japanese>.
 
-    @array = $conv->string( $string );
+=head2 $roman = $conv->chars( $string );
+
+This method returns romanized letters of Kana characters.
+
+=head2 @array = $conv->string( $string );
 
 This method returns a array of referenced arrays
 which are pairs of a Kana chacater and its romanized letters.
@@ -48,15 +54,7 @@ which are pairs of a Kana chacater and its romanized letters.
 
 =head1 SEE ALSO
 
-L<Lingua::ZH::Romanize::Japanese>
-
-http://www.kawa.net/works/ajax/romanize/japanese-e.html
-
-=head1 AUTHOR
-
-Yusuke Kawasaki <u-suke [at] kawa.net>
-
-http://www.kawa.net/
+L<Lingua::JA::Romanize::Japanese>
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -70,7 +68,7 @@ and/or modify it under the same terms as Perl itself.
     package Lingua::JA::Romanize::Kana;
     use strict;
     use vars qw( $VERSION );
-    $VERSION = "0.11";
+    $VERSION = "0.12";
 # ----------------------------------------------------------------
     my $KANA_MAP = [qw(
             xa  a   xi  i   xu  u   xe  e   xo  o   ka  ga  ki  gi  ku
@@ -123,7 +121,7 @@ sub string {
         }
     }
 
-	$self->normalize( $array );
+    $self->normalize( $array );
 }
 # ----------------------------------------------------------------
 sub normalize {

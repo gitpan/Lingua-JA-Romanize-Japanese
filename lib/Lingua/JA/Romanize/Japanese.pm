@@ -22,20 +22,29 @@ Lingua::JA::Romanize::Japanese - Romanization of Japanese language
 
 =head1 DESCRIPTION
 
-Japanese is written with a mix of Kanji and Kana characters.
+Japanese language is written with a mix of Kanji and Kana characters.
+Most of Kanji characters used in Japan were imported from China.
+Two types of Kana characters, called Katakana and Hiragana, were created in Japan.
+Kana characters are general terms for the syllabic Japanese scripts.
 
-    $conv = Lingua::JA::Romanize::Japanese->new();
+=head1 METHODS
+
+=head2 $conv = Lingua::JA::Romanize::Japanese->new();
 
 This constructer methods returns a new object with its dictionary cached.
 
-    $roman = $conv->char( $kanji );
+=head2 $roman = $conv->char( $kanji );
 
 This method returns romanized letters of a Japanese character.
 It returns undef when $Kana is not a valid Japanese character.
 The argument's encoding must be UTF-8.
 Both of Kanji and Kana characters are allowed.
 
-    @array = $conv->string( $string );
+=head2 $roman = $conv->chars( $string );
+
+This method returns romanized letters of Japanese characters.
+
+=head2 @array = $conv->string( $string );
 
 This method returns a array of referenced arrays
 which are pairs of Japanese chacater(s) and its romanized letters.
@@ -47,7 +56,7 @@ which are pairs of Japanese chacater(s) and its romanized letters.
 =head1 DICTIONARY
 
 This module's Japanese to roman mapping table is based on
-the dictionary of SKK which is a Japanese input method on Emacs. 
+the dictionary of SKK which is a Japanese input method on Emacs.
 It was designed by Dr. Masahiko Sato and created in 1987.
 SKK is an abbreviation of 'Simple Kana to Kanji conversion program'.
 
@@ -57,17 +66,19 @@ L<DB_File> module is required.
 
 =head1 SEE ALSO
 
-L<Lingua::ZH::Romanize::Kana>
+L<Lingua::JA::Romanize::Kana>
+L<Lingua::JA::Romanize::Juman>
+L<Lingua::JA::Romanize::MeCab>
+L<Lingua::ZH::Romanize::Pinyin>
+L<Lingua::KO::Romanize::Hangul>
 
-http://www.kawa.net/works/ajax/romanize/japanese-e.html
+http://www.kawa.net/works/perl/romanize/romanize-e.html
 
 http://openlab.jp/skk/
 
 =head1 AUTHOR
 
-Yusuke Kawasaki <u-suke [at] kawa.net>
-
-http://www.kawa.net/
+Yusuke Kawasaki http://www.kawa.net/
 
 =head1 COPYRIGHT
 
@@ -89,7 +100,7 @@ any later version.
     use Fcntl;
     use Lingua::JA::Romanize::Kana;
     use vars qw( $VERSION );
-    $VERSION = "0.11";
+    $VERSION = "0.12";
 # ----------------------------------------------------------------
     my $LINE_MAP = [qw(
             a   a   i   i   u   u   e   e   o   o   k   g   k   g   k
@@ -112,7 +123,7 @@ sub new {
     my $flags = Fcntl::O_RDONLY();
     my $mode = 0644;
     my $self;
-	my $btree = DB_File::BTREEINFO->new();
+    my $btree = DB_File::BTREEINFO->new();
     tie( %$self, 'DB_File', $dbfile, $flags, $mode, $btree ) or Carp::croak "$! - $dbfile\n";
     bless $self, $package;
 
@@ -131,14 +142,7 @@ sub char {
 sub chars {
     my $self = shift;
     my @array = $self->string( shift );
-    join( "  ", map {$#$_>0 ? $_->[1] : $_->[0]} @array );
-}
-# ----------------------------------------------------------------
-sub _string {
-    my $self = shift;
-    my $array = shift;
-    my $roman;
-    my $kanji;
+    join( " ", map {$#$_>0 ? $_->[1] : $_->[0]} @array );
 }
 # ----------------------------------------------------------------
 sub string {
