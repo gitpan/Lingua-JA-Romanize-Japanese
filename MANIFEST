@@ -8,8 +8,9 @@ skk/SKK-JISYO.S
 README
 MANIFEST
 META.yml
-t/kana.t
-t/japanese.t
-t/juman.t
-t/mecab.t
 Changes
+make-dist.sh
+t/04_mecab.t
+t/03_juman.t
+t/02_japanese.t
+t/01_kana.t

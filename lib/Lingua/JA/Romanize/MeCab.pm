@@ -25,6 +25,12 @@ Lingua::JA::Romanize::MeCab - Romanization of Japanese language with MeCab
 This is MeCab version of L<Lingua::JA::Romanize::Japanese> module.
 MeCab's Perl binding, MeCab.pm, is required.
 
+=head1 UTF-8 DICTIONARY
+
+If MeCab's dictionary is generated with UTF8, --with-charset=utf8,
+use Lingua::JA::Romanize::MeCab::UTF8->new()
+instead of Lingua::JA::Romanize::MeCab->new().
+
 =head1 SEE ALSO
 
 L<Lingua::JA::Romanize::Japanese>
@@ -40,89 +46,153 @@ and/or modify it under the same terms as Perl itself.
 
 =cut
 # ----------------------------------------------------------------
-    package Lingua::JA::Romanize::MeCab;
-    use strict;
-    use Carp;
-    use MeCab;
-    use Lingua::JA::Romanize::Kana;
-    use vars qw( $VERSION );
-    $VERSION = "0.12";
-# ----------------------------------------------------------------
-    if ( $] > 5.008 ) {
-        require Encode;
-    } else {
-        local $@;
-        eval { require Jcode; };
-        die "Jcode.pm is required on Perl $]\n" if $@;
-    }
+package Lingua::JA::Romanize::MeCab;
+use strict;
+use Carp;
+use MeCab;
+use Lingua::JA::Romanize::Kana;
+use vars qw( $VERSION );
+$VERSION = "0.13";
+
 # ----------------------------------------------------------------
 sub new {
     my $package = shift;
-    my $self = {};
-    $self->{mecab} = MeCab::Tagger->new( @_ );
-    $self->{kana} = Lingua::JA::Romanize::Kana->new();
+    my $self    = {};
+    &require_encode_or_jcode();
+    $self->{mecab} = MeCab::Tagger->new(@_);
+    $self->{kana}  = Lingua::JA::Romanize::Kana->new();
     $self->{jcode} = Jcode->new("") unless ( $] > 5.008 );
     bless $self, $package;
     $self;
 }
-# ----------------------------------------------------------------
+
 sub char {
-    my $self = shift;
-    my $src = shift;
+    my $self  = shift;
+    my $src   = shift;
     my $roman = $self->{kana}->char($src);
     return $roman if $roman;
-    my $pair = ($self->string( $src ))[0];  # need loop for nodes which have surface
+    my $pair =
+      ( $self->string($src) )[0];    # need loop for nodes which have surface
     return if ( scalar @$pair == 1 );
     return $pair->[1];
 }
-# ----------------------------------------------------------------
+
 sub chars {
-    my $self = shift;
-    my @array = $self->string( shift );
-    join( " ", map {$#$_>0 ? $_->[1] : $_->[0]} @array );
+    my $self  = shift;
+    my @array = $self->string(shift);
+    join( " ", map { $#$_ > 0 ? $_->[1] : $_->[0] } @array );
 }
-# ----------------------------------------------------------------
+
 sub string {
-    my $self = shift;
-    my $src = $self->utf8_to_eucjp( shift );
+    my $self  = shift;
+    my $src   = $self->from_utf8(shift);
     my $array = [];
 
-    my $node = $self->{mecab}->parseToNode( $src );
-    for( ; $node; $node = $node->{next} ) {
+    my $node = $self->{mecab}->parseToNode($src);
+    for ( ; $node ; $node = $node->{next} ) {
         next unless defined $node->{surface};
-        my $midasi = $self->eucjp_to_utf8( $node->{surface} );
-        my $kana = (split( /,/, $node->{feature} ))[7];
-        $kana = $self->eucjp_to_utf8( $kana ) if defined $kana;
+        my $midasi = $self->to_utf8( $node->{surface} );
+        my $kana = ( split( /,/, $node->{feature} ) )[7];
+        $kana = $self->to_utf8($kana) if defined $kana;
         my @array = $self->{kana}->string($kana) if $kana;
-        my $roman = join( "", map {$_->[1]} grep {$#$_>0} @array ) if scalar @array;
-        my $pair = $roman ? [ $midasi, $roman ] : [ $midasi ];
+        my $roman = join( "", map { $_->[1] } grep { $#$_ > 0 } @array )
+          if scalar @array;
+        my $pair = $roman ? [ $midasi, $roman ] : [$midasi];
         push( @$array, $pair );
     }
 
-    $self->{kana}->normalize( $array );
+    $self->{kana}->normalize($array);
 }
+
+sub require_encode_or_jcode {
+    if ( $] > 5.008 ) {
+        return if defined $Encode::VERSION;
+        require Encode;
+    }
+    else {
+        return if defined $Jcode::VERSION;
+        local $@;
+        eval { require Jcode; };
+        Carp::croak "Jcode.pm is required on Perl $]\n" if $@;
+    }
+}
+
+*from_utf8 = \&Lingua::JA::Romanize::MeCab::EUC::from_utf8;
+*to_utf8 = \&Lingua::JA::Romanize::MeCab::EUC::to_utf8;
+
 # ----------------------------------------------------------------
-sub utf8_to_eucjp {
+package Lingua::JA::Romanize::MeCab::UTF8;
+use strict;
+use vars qw( @ISA );
+@ISA = qw( Lingua::JA::Romanize::MeCab );
+
+sub from_utf8 {
+    $_[1];              # no need to encode
+}
+
+sub to_utf8 {
+    $_[1];              # no need to decode
+}
+
+# ----------------------------------------------------------------
+package Lingua::JA::Romanize::MeCab::EUC;
+use strict;
+use vars qw( @ISA );
+@ISA = qw( Lingua::JA::Romanize::MeCab );
+
+sub from_utf8 {
     my $self = shift;
-    my $src = shift;
+    my $src  = shift;
     if ( $] > 5.008 ) {
         Encode::from_to( $src, "UTF-8", "EUC-JP" );
-    } else {
+    }
+    else {
         $src = $self->{jcode}->set( \$src, "utf8" )->euc();
     }
     $src;
 }
-# ----------------------------------------------------------------
-sub eucjp_to_utf8 {
+
+sub to_utf8 {
     my $self = shift;
-    my $src = shift;
+    my $src  = shift;
     if ( $] > 5.008 ) {
         Encode::from_to( $src, "EUC-JP", "UTF-8" );
-    } else {
+    }
+    else {
         $src = $self->{jcode}->set( \$src, "euc" )->utf8();
     }
     $src;
 }
+
 # ----------------------------------------------------------------
-;1;
+package Lingua::JA::Romanize::MeCab::SJIS;
+use strict;
+use vars qw( @ISA );
+@ISA = qw( Lingua::JA::Romanize::MeCab );
+
+sub from_utf8 {
+    my $self = shift;
+    my $src  = shift;
+    if ( $] > 5.008 ) {
+        Encode::from_to( $src, "UTF-8", "CP932" );
+    }
+    else {
+        $src = $self->{jcode}->set( \$src, "utf8" )->sjis();
+    }
+    $src;
+}
+
+sub to_utf8 {
+    my $self = shift;
+    my $src  = shift;
+    if ( $] > 5.008 ) {
+        Encode::from_to( $src, "CP932", "UTF-8" );
+    }
+    else {
+        $src = $self->{jcode}->set( \$src, "sjis" )->utf8();
+    }
+    $src;
+}
+
 # ----------------------------------------------------------------
+1;

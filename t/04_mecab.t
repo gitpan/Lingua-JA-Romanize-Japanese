@@ -1,14 +1,39 @@
 # ----------------------------------------------------------------
     use strict;
-    use Test::More tests => 14;
+    use Test::More tests => 15;
 # ----------------------------------------------------------------
 SKIP: {
     local $@;
     eval { require MeCab; };
-    skip( "MeCab.pm is not available.", 14 ) if $@;
+    skip( "MeCab.pm is not available.", 15 ) if $@;
     use_ok('Lingua::JA::Romanize::MeCab');
-    my $roman = Lingua::JA::Romanize::MeCab->new();
+    my $roman = &detect_dict_code();
     &test_ja( $roman );
+}
+# ----------------------------------------------------------------
+sub detect_dict_code {
+    my $hash = {
+        euc     =>  Lingua::JA::Romanize::MeCab::EUC->new(),
+        utf8    =>  Lingua::JA::Romanize::MeCab::UTF8->new(),
+        sjis    =>  Lingua::JA::Romanize::MeCab::SJIS->new(),
+    };
+    my $test = {
+        namae   =>  "\xe5\x90\x8d\xe5\x89\x8d",
+        ugoku   =>  "\xe5\x8b\x95\xe3\x81\x8f",
+        hayai   =>  "\xe9\x80\x9f\xe3\x81\x84",
+    };
+    my $count = {};
+
+    foreach my $code ( keys %$hash ) {
+        $count->{$code} = 0;
+        foreach my $str ( keys %$test ) {
+            my $out = $hash->{$code}->chars( $test->{$str} );
+            $count->{$code} ++ if ( $str eq $out );
+        }
+    }
+    my $detect = ( sort {$count->{$b} <=> $count->{$a}} keys %$hash )[0];
+    ok( $count->{$detect}, "charset detected: $detect" );
+    $hash->{$detect};
 }
 # ----------------------------------------------------------------
 sub test_ja {
