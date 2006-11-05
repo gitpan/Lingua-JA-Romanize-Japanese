@@ -6,6 +6,11 @@ SKIP: {
     local $@;
     eval { require MeCab; };
     skip( "MeCab.pm is not available.", 15 ) if $@;
+	my $mecab;
+	eval {
+	    $mecab = MeCab::Tagger->new(@_);
+	};
+    skip( "MeCab::Tagger is not available. $@", 15 ) unless ref $mecab;
     use_ok('Lingua::JA::Romanize::MeCab');
     my $roman = &detect_dict_code();
     &test_ja( $roman );

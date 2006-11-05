@@ -6,11 +6,16 @@ SKIP: {
     local $@;
     eval { require Juman; };
     skip( "Juman.pm is not available.", 14 ) if $@;
-    my $found = 0;
+    my $found;
     foreach my $path ( split( /:/, $ENV{PATH} )) {
-        $found ++ if ( -x "$path/juman" );
+		my $test = "$path/juman";
+        $found = $test if ( -x $test );
     }
-    warn " juman is not found in $ENV{PATH}\n" unless $found;
+    warn " juman command found: $found\n" if $found;
+    warn " \$JUMANSERVER=$ENV{JUMANSERVER}\n" if $ENV{JUMANSERVER};
+    if ( ! $found && ! $ENV{JUMANSERVER} ) {
+        skip( "JUMAN is not available.", 14 );
+    }
     use_ok('Lingua::JA::Romanize::Juman');
     my $roman = Lingua::JA::Romanize::Juman->new();
     &test_ja( $roman );

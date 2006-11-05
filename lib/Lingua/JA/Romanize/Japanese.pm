@@ -100,7 +100,7 @@ use DB_File;
 use Fcntl;
 use Lingua::JA::Romanize::Kana;
 use vars qw( $VERSION );
-$VERSION = "0.13";
+$VERSION = "0.14";
 
 my $LINE_MAP = [
     qw(

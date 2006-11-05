@@ -10,7 +10,7 @@ MANIFEST
 META.yml
 Changes
 make-dist.sh
+t/02_japanese.t
 t/04_mecab.t
 t/03_juman.t
-t/02_japanese.t
 t/01_kana.t

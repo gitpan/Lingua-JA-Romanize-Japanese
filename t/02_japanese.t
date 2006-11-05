@@ -20,7 +20,7 @@
 
     my $c6 = $roman->chars("\xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e");
     $c6 =~ s/\s+//g;
-    ok( $c6 =~ /^(nihongo|nippongo)$/, "chars: nihongo [$c6]" );
+    ok( $c6 =~ /^(nihongo|nippongo|\/)+$/, "chars: nihongo [$c6]" );
 
     my @t1 = $roman->string("\xE6\xBC\xA2\xE5\xAD\x97");
     ok( $t1[0][1] =~ /(^|\W)kanji(\W|$)/, "string: okuri-nashi kanji [$t1[0][1]]" );

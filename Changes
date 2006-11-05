@@ -1,5 +1,9 @@
 # Lingua::JA::Romanize::* modules Changes
 
+2006/11/06 (0.14)
+    - test scripts updated for tests passed.
+    - MeCab 0.93 with ipadic-2.7.0-20060707 tested.
+
 2006/05/08 (0.13)
     - new sub classes: MeCab::UTF8 in Lingua::JA::Romanize::MeCab
     - t/03_juman.t tests $PATH to find juman command.
