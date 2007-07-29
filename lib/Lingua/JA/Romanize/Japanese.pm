@@ -82,7 +82,7 @@ Yusuke Kawasaki http://www.kawa.net/
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006 Yusuke Kawasaki. All rights reserved.
+Copyright (c) 2006-2007 Yusuke Kawasaki. All rights reserved.
 
 =head1 LICENSE
 
@@ -100,7 +100,7 @@ use DB_File;
 use Fcntl;
 use Lingua::JA::Romanize::Kana;
 use vars qw( $VERSION );
-$VERSION = "0.14";
+$VERSION = "0.15";
 
 my $LINE_MAP = [
     qw(
@@ -113,34 +113,32 @@ my $LINE_MAP = [
       )
 ];
 my $DICT_DB = 'Japanese.bdb';
-my $KANAOBJ;
 
 # ----------------------------------------------------------------
 sub new {
     my $package = shift;
+    my $self = {};
+    $self->{file} = shift || &_detect_sdbm($package);
+    $self->{kana} = Lingua::JA::Romanize::Kana->new();
 
-    my $dbfile = shift || &_detect_sdbm($package);
-    Carp::croak "$! - $dbfile\n" unless ( -r $dbfile );
-
-    my $dbhash = {};
-    my $flags  = Fcntl::O_RDONLY();
-    my $mode   = 0644;
-    my $self;
+    Carp::croak "$! - $self->{file}\n" unless ( -r $self->{file} );
+    my $dict  = {};
+    my $flags = Fcntl::O_RDONLY();
+    my $mode  = 0644;
     my $btree = DB_File::BTREEINFO->new();
-    tie( %$self, 'DB_File', $dbfile, $flags, $mode, $btree )
-      or Carp::croak "$! - $dbfile\n";
+    tie( %$dict, 'DB_File', $self->{file}, $flags, $mode, $btree )
+      or Carp::croak "$! - $self->{file}\n";
+    $self->{dict} = $dict;
+
     bless $self, $package;
-
-    $KANAOBJ ||= Lingua::JA::Romanize::Kana->new();
-
     $self;
 }
 
 sub char {
     my $self = shift;
     my $char = shift;
-    return $self->{$char} if ( exists $self->{$char} && $self->{$char} ne "" );
-    $KANAOBJ->char($char);
+    return $self->{dict}->{$char} if ( exists $self->{dict}->{$char} && $self->{dict}->{$char} ne "" );
+    $self->{kana}->char($char);
 }
 
 sub chars {
@@ -167,10 +165,8 @@ sub string {
             if ( $split->[0] =~ /^\xE3/ ) {
                 my $kana  = shift @$split;
                 my $pair  = [$kana];
-                my $roman = $KANAOBJ->char($kana);
+                my $roman = $self->{kana}->char($kana);
                 $pair->[1] = $roman if defined $roman;
-
-                # warn "KANA\t[kana=$kana] [roman=$roman]\n";
                 push( @$array, $pair );
                 next;
             }
@@ -185,32 +181,30 @@ sub string {
                 ### okuri-ari
                 if ( $next =~ /^\xE3/ ) {
                     my $okuri = $self->_kana_line($next);
-                    if ( exists $self->{ $tryword . $okuri } ) {
-                        $roman     = $self->{ $tryword . $okuri };
+                    if ( exists $self->{dict}->{ $tryword . $okuri } ) {
+                        $roman     = $self->{dict}->{ $tryword . $okuri };
                         $word      = $tryword;
                         $#$trylist = -1;                             # empty
-                          # warn "OKURI\t[kanji=$tryword] [roman=$roman] [okuri=$okuri]\n";
                     }
                 }
 
-                last unless exists $self->{ $tryword . $next };
+                last unless exists $self->{dict}->{ $tryword . $next };
                 $tryword .= $next;
                 push( @$trylist, shift @$split );
-                if ( $self->{$tryword} ne "" ) {
-                    $roman     = $self->{$tryword};
+                if ( $self->{dict}->{$tryword} ne "" ) {
+                    $roman     = $self->{dict}->{$tryword};
                     $word      = $tryword;
                     $#$trylist = -1;                  # empty
                 }
             }
 
-            # warn "FIND\t[kanji=$word] [roman=$roman]\n";
             unshift( @$split, @$trylist ) if scalar @$trylist;
             my $pair = defined $roman ? [ $word, $roman ] : [$word];
             push( @$array, $pair );
         }
     }
 
-    $KANAOBJ->normalize($array);
+    $self->{kana}->normalize($array);
 }
 
 sub _kana_line {

@@ -43,6 +43,14 @@ L<IO::Zlib> module is optional and used to parse gzipped files.
 
 L<Lingua::JA::Romanize::Japanese>
 
+=head1 AUTHOR
+
+Yusuke Kawasaki, http://www.kawa.net/
+
+=head1 COPYRIGHT
+
+Copyright (c) 2006-2007 Yusuke Kawasaki. All rights reserved.
+
 =cut
 # ----------------------------------------------------------------
 package Lingua::JA::Romanize::DictJA;
@@ -50,6 +58,7 @@ use strict;
 use vars qw( $VERSION );
 $VERSION = "0.13";
 use Lingua::JA::Romanize::Kana;
+use ExtUtils::MakeMaker;
 use Fcntl;
 use IO::File;
 
@@ -91,9 +100,10 @@ sub update {
     my $dbpath = $base . "/" . $DICT_DB;
     if ( -r $dbpath ) {
         print "DB_File is already exist: $dbpath\n";
-        print "Do you wish to overwrite it? [y] ";
-        if ( !&get_yes("y") ) {
-            print "Canceled.\n";
+        my $mess = 'Do you wish to overwrite this?';
+        my $yes = ExtUtils::MakeMaker::prompt( $mess, 'y' );
+        if ( $yes ne 'y' ) {
+            print "Canceled to update the dictionary.\n";
             return;
         }
     }
@@ -120,8 +130,9 @@ sub update {
     print "External dictionaries:\n";
     my $cand = defined $IO::Zlib::VERSION ? $DIC_GZIPED : $DIC_LARGE;
     print "\t", $_, "\n" foreach (@$cand);
-    print "Do you wish to download these files? [y] ";
-    if ( &get_yes("y") ) {
+    my $mess = 'Do you wish to download these files?';
+    my $yes = ExtUtils::MakeMaker::prompt( $mess, 'y' );
+    if ( $yes eq 'y' ) {
         $diclist = $cand;
     }
     else {
@@ -272,15 +283,6 @@ sub is_japanese {
     return 1 if ( 0x3041 <= $ucs2 && $ucs2 <= 0x3093 );    # hiragana
     return 1 if ( 0x30A1 <= $ucs2 && $ucs2 <= 0x30F6 );    # katakana
     undef;
-}
-
-sub get_yes {
-    my $default = shift;
-    my $yn      = <STDIN>;
-    $yn =~ s/[\000-\040]//gs;
-    $yn = $default if ( $yn eq "" );
-    $yn = lc($yn);
-    return ( $yn eq "y" || $yn eq "yes" );
 }
 
 sub require_db_file {

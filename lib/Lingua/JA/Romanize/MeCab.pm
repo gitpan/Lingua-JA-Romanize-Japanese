@@ -37,12 +37,15 @@ L<Lingua::JA::Romanize::Japanese>
 
 http://mecab.sourceforge.jp/ (Japanese)
 
+=head1 AUTHOR
+
+Yusuke Kawasaki, http://www.kawa.net/
+
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2006 Yusuke Kawasaki. All rights reserved.
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
+Copyright (c) 2006-2007 Yusuke Kawasaki. All rights reserved.
+This program is free software; you can redistribute it and/or 
+modify it under the same terms as Perl itself.
 
 =cut
 # ----------------------------------------------------------------
@@ -52,7 +55,7 @@ use Carp;
 use MeCab;
 use Lingua::JA::Romanize::Kana;
 use vars qw( $VERSION );
-$VERSION = "0.13";
+$VERSION = "0.15";
 
 # ----------------------------------------------------------------
 sub new {
@@ -91,6 +94,7 @@ sub string {
     my $node = $self->{mecab}->parseToNode($src);
     for ( ; $node ; $node = $node->{next} ) {
         next unless defined $node->{surface};
+    next unless length( $node->{surface} );
         my $midasi = $self->to_utf8( $node->{surface} );
         my $kana = ( split( /,/, $node->{feature} ) )[7];
         $kana = $self->to_utf8($kana) if defined $kana;

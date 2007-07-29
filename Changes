@@ -1,5 +1,10 @@
 # Lingua::JA::Romanize::* modules Changes
 
+2007/07/29 (0.15)
+    - L::J::R::DictJA uses ExtUtils::MakeMaker::prompt().
+    - L::J::R::Japanese changes its internal HASH structure.
+    - L::J::R::MeCab supports mecab-0.95 with ipadic-2.7.0-20070610.
+
 2006/11/06 (0.14)
     - test scripts updated for tests passed.
     - MeCab 0.93 with ipadic-2.7.0-20060707 tested.

@@ -10,7 +10,7 @@ doit () {
 }
 
 egrep -v '^t/.*\.t$' MANIFEST > MANIFEST~
-ls -t t/*.t >> MANIFEST~
+ls -t t/*.t | sort >> MANIFEST~
 diff MANIFEST MANIFEST~ > /dev/null || doit /bin/mv -f MANIFEST~ MANIFEST
 /bin/rm -f MANIFEST~
 

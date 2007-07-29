@@ -5,11 +5,13 @@ use Lingua::JA::Romanize::DictJA;
 
 Lingua::JA::Romanize::DictJA->update();
 
-WriteMakefile(
-    NAME                => 'Lingua-JA-Romanize-Japanese',
+my $opt = {
+    NAME                => 'Lingua::JA::Romanize::Japanese',
     VERSION_FROM        => 'lib/Lingua/JA/Romanize/Japanese.pm',
     PREREQ_PM           => {
         'Test::More'    => '0',
-	'Storable'	=> '0',
+	'DB_File'	=> '0',
     },
-);
+};
+
+WriteMakefile( %$opt );
